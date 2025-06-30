@@ -7,7 +7,7 @@
 
 let snake = [ {x: 150, y: 150}, {x:140, y:150}, {x:130, y:150},{x:120, y:150},{x:110,y:150}];
 
-let dx = 0;
+let dx = 10;
 let dy = 0;
 let foodx;
 let foody;
@@ -33,22 +33,38 @@ function clearcanvas() {
     snake.forEach(drawSnakePart);
   }
 
- function advanceSnake(){
-    const head = {x: snake[0].x + dx, y: snake[0].y + dy };
-    snake.unshift(head);
-    
-    const hasEatenFood = head.x === foodx && head.y === foody;
+function advanceSnake() {
+  const head = { x: snake[0].x + dx, y: snake[0].y + dy };
 
-    if(hasEatenFood){
-      createFood();
-      score += 10;
-      document.querySelector(".score").textContent = score;
 
-    } else{
-      snake.pop();
-    }
-    
- }
+  const hitWall =
+    head.x < 0 ||
+    head.x >= canvas.width ||
+    head.y < 0 ||
+    head.y >= canvas.height;
+
+
+  const hitSelf = snake.slice(1).some(part => part.x === head.x && part.y === head.y);
+
+  if (hitWall || hitSelf) {
+    alert("Game Over! Your final score: " + score);
+    clearInterval(gameInterval); // 🛑 Stop the game
+    return;
+  }
+
+  snake.unshift(head);
+
+  const hasEatenFood = head.x === foodx && head.y === foody;
+
+  if (hasEatenFood) {
+    createFood();
+    score += 10;
+    document.querySelector(".score").textContent = score;
+  } else {
+    snake.pop();
+  }
+}
+
 
 
 function changeDirection(event){
@@ -107,7 +123,7 @@ function createFood() {
     isOnSnake = snake.some(part => part.x === newFood.x && part.y === newFood.y);
   } while (isOnSnake);
 
-  // After finding a good spot, assign to global foodx, foody
+
   foodx = newFood.x;
   foody = newFood.y;
 }
@@ -130,6 +146,9 @@ function createFood() {
     drawFood();
   }
 
-    setInterval(() => {
+  const gameInterval = setInterval(() => {
     gameLoop()
   }, 100);
+
+
+
