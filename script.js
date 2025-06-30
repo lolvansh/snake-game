@@ -1,13 +1,17 @@
   const canvas = document.querySelector("#gamecanvas");
   const ctx = canvas.getContext("2d");
+  
 
   
 
 
 let snake = [ {x: 150, y: 150}, {x:140, y:150}, {x:130, y:150},{x:120, y:150},{x:110,y:150}];
 
-let dx = 10;
-let dy = 0
+let dx = 0;
+let dy = 0;
+let foodx;
+let foody;
+let score = 0;
 
 function clearcanvas() {
   ctx.fillStyle = "white";
@@ -32,15 +36,19 @@ function clearcanvas() {
  function advanceSnake(){
     const head = {x: snake[0].x + dx, y: snake[0].y + dy };
     snake.unshift(head);
-    snake.pop();
+    
+    const hasEatenFood = head.x === foodx && head.y === foody;
+
+    if(hasEatenFood){
+      createFood();
+      score += 10;
+      document.querySelector(".score").textContent = score;
+
+    } else{
+      snake.pop();
+    }
     
  }
-
-
-
-
-
-
 
 
 function changeDirection(event){
@@ -78,12 +86,48 @@ function changeDirection(event){
 
 document.addEventListener("keydown", changeDirection);
 
-  drawSnake();
+
+
+
+function randomTen(min, max) {
+  return Math.floor((Math.random() * (max - min + 1) + min) / 10) * 10;
+}
+
+function createFood() {
+  let newFood;
+  let isOnSnake;
+
+  do {
+    newFood = {
+      x: randomTen(0, canvas.width - 10),
+      y: randomTen(0, canvas.height - 10)
+    };
+
+    // Check if this food overlaps the snake
+    isOnSnake = snake.some(part => part.x === newFood.x && part.y === newFood.y);
+  } while (isOnSnake);
+
+  // After finding a good spot, assign to global foodx, foody
+  foodx = newFood.x;
+  foody = newFood.y;
+}
+
+  function drawFood(){
+    ctx.fillStyle = 'red';
+    ctx.strokeStyle = 'darkred';
+    ctx.fillRect(foodx, foody,10,10);
+    ctx.strokeRect (foodx,foody,10,10);
+  }
+
+
+  createFood();
+
 
   function gameLoop() {
     clearcanvas();
     advanceSnake();
     drawSnake();
+    drawFood();
   }
 
     setInterval(() => {
